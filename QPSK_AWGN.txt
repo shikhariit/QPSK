@@ -1,0 +1,46 @@
+close all;
+clearvars;
+clc;
+tic;
+N=10000;
+bits1=randi([0,1],1,N);
+bits2=randi([0,1],1,N);
+SNR=-10:10;
+SNRL=10.^(SNR/10);
+IN=(2*bits1)-1;
+QUAD=(2*bits2)-1;
+S=IN+1j*QUAD;
+y=zeros(length(SNRL),N);
+ber1=zeros(length(SNRL),N);
+ber2=zeros(length(SNRL),N);
+ber=zeros(1,length(SNRL));
+for i=1:length(SNRL)
+    n=1./SNRL;
+    noise= sqrt(n(i)/2)*(randn(1,N)+1j*randn(1,N));
+    y(i,:)=S+noise;
+end
+for i=1:length(SNRL)
+    for j=1:N
+        y_r=sign(real(y));
+        y_i=sign(imag(y));
+        S_r=sign(real(S));
+        S_i=sign(imag(S));
+ 
+    end
+    ber1(i,:)=(y_r(i,:)~=S_r);
+    ber2(i,:)=(y_i(i,:)~=S_i);
+    ber(i)=(sum(ber1(i,:))+sum(ber2(i,:)))/(2*N);
+end
+
+BER_th = 0.5*erfc(sqrt(SNRL));
+
+figure(1);
+semilogy(SNR, BER_th,'r-')  
+hold on
+semilogy(SNR, ber,'k*')                                
+xlabel('SNR[dB]')                                    
+ylabel('Bit Error Rate');                                        
+legend('Theoretical', 'Simulated');
+title(['Probability of Bit Error for QPSK Modulation']);
+grid on;
+hold off;
